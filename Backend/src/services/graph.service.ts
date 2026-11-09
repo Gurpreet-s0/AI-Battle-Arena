@@ -11,9 +11,6 @@ import {
 import * as z from "zod";
 import { createAgent, HumanMessage, providerStrategy } from "langchain";
 
-// const res = await geminiModel.invoke("What model are you?")
-// console.log(res)
-
 const graphState = new StateSchema({
   problem: z.string().default(""),
   solution1: z.string().default(""),
@@ -72,27 +69,26 @@ async function judgeNode(state: typeof graphState.State) {
   } = judgeResponse.structuredResponse;
 
   return {
-    judge:{
-solution_1_Score,
-    solution_2_Score,
-    solution_1_reasoning,
-    solution_2_reasoning,
-    }
-    
+    judge: {
+      solution_1_Score,
+      solution_2_Score,
+      solution_1_reasoning,
+      solution_2_reasoning,
+    },
   };
 }
 
 const graph = new StateGraph(graphState)
   .addNode("solution", solutionNode)
   .addNode("judgeNode", judgeNode)
-  .addEdge(START,"solution")
-  .addEdge("solution","judgeNode")
-  .addEdge("judgeNode",END)
-  .compile()
+  .addEdge(START, "solution")
+  .addEdge("solution", "judgeNode")
+  .addEdge("judgeNode", END)
+  .compile();
 
-
-const result = await graph.invoke({
-    problem:"Write a function for finding factorial of a number in Javascript"
-})
-
-console.log(result)
+export default async function runGraph(problem: string) {
+  const result = await graph.invoke({
+    problem:problem
+  });
+  return result;
+};
